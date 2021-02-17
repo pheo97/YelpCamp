@@ -41,10 +41,15 @@ app.get('/campgrounds/new', (req,res) =>{
  });
 
  //save new campground to database 
- app.post('/campgrounds', async(req,res)=>{
+ app.post('/campgrounds', async(req,res,next)=>{
+     try{
       const campground = new Campground(req.body.campground);
       await campground.save();
       res.redirect(`/campgrounds/${campground._id}`);
+     }catch(e)
+     {
+         next(e);
+     }
  })
 
 //view campground details 
@@ -73,6 +78,10 @@ app.delete('/campgrounds/:id',async(req,res) =>{
     res.redirect('/campgrounds');
 
 });
+
+app.use((err,req,res,next)=>{
+    res.send("Not valid Number");
+})
 
 
 
