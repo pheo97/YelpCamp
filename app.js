@@ -6,6 +6,9 @@ const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
 const Campground = require('./models/campground');
 const mongoose = require('mongoose');
+const catchAsync = require('./Utilities/catchAsync');
+const ExpressError = require('./Utilities/ExpressError');
+const joi = require('joi');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true})
 .then(() => {
@@ -41,46 +44,52 @@ app.get('/campgrounds/new', (req,res) =>{
  });
 
  //save new campground to database 
- app.post('/campgrounds', async(req,res,next)=>{
-     try{
+ app.post('/campgrounds', catchAsync(async(req,res,next)=>{
       const campground = new Campground(req.body.campground);
+
+      const campgroundSchema = joi.object({
+          campground:joi.object({
+             title: joi.string().required(),
+             price: joi.number().required().min(0)
+          }).required()
+      })
       await campground.save();
       res.redirect(`/campgrounds/${campground._id}`);
-     }catch(e)
-     {
-         next(e);
-     }
- })
+ }))
 
 //view campground details 
-app.get('/campgrounds/:id', async (req,res) =>{
+app.get('/campgrounds/:id',catchAsync(async (req,res) =>{
     const campground = await Campground.findById(req.params.id)
     res.render('campgrounds/details',{campground})
-});
+}));
 
 //Edit campground
-app.get('/campgrounds/:id/edit', async (req,res)=>{
+app.get('/campgrounds/:id/edit',catchAsync(async (req,res)=>{
     const campground = await Campground.findById(req.params.id)
     res.render('campgrounds/edit',{campground});
-});
+}));
 
 //update to the editted version of the campground
-app.put('/campgrounds/:id', async(req,res)=>{
+app.put('/campgrounds/:id', catchAsync( async(req,res)=>{
     const {id} = req.params;
     const campground = await Campground.findByIdAndUpdate(id,{...req.body.campground})
     res.render('campgrounds/edit',{campground});
-});
+}));
 
 //delete campground
-app.delete('/campgrounds/:id',async(req,res) =>{
+app.delete('/campgrounds/:id',catchAsync(async(req,res) =>{
     const { id } =req.params
     const campground = await Campground.findByIdAndDelete(id)
     res.redirect('/campgrounds');
 
-});
-
+}));
+app.all('*',(req,res,next)=>{
+    next(new ExpressError('Page Not FOund',404))
+})
 app.use((err,req,res,next)=>{
-    res.send("Not valid Number");
+    const{statusCode = 500,message = 'Something Went wrong!'} = err;
+    if(!err.message) err.message = 'Oh No Something Went Wrong'
+    res.status(statusCode).render('error' , { err}) 
 })
 
 
