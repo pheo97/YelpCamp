@@ -3,6 +3,7 @@ const router = express.Router({mergeParams:true});
 
 const catchAsync = require('../Utilities/catchAsync');
 const ExpressError = require('../Utilities/ExpressError');
+const {isloggedIn} = require('../middleware');
 
 
 
@@ -28,7 +29,7 @@ router.get('/', async (req,res) =>{
 });
 
 //add new campground
-router.get('/new', (req,res) =>{
+router.get('/new',isloggedIn, (req,res) =>{
     res.render('campgrounds/new')
  });
 
@@ -52,13 +53,13 @@ router.get('/:id',catchAsync(async (req,res) =>{
 }));
 
 //Edit campground
-router.get('/:id/edit' ,catchAsync(async (req,res)=>{
+router.get('/:id/edit' ,isloggedIn,catchAsync(async (req,res)=>{
     const campground = await Campground.findById(req.params.id)
     res.render('campgrounds/edit',{campground});
 }));
 
 //update to the editted version of the campground
-router.put('/:id', validateCampground,catchAsync( async(req,res)=>{
+router.put('/:id', isloggedIn,validateCampground,catchAsync( async(req,res)=>{
     const {id} = req.params;
     const campground = await Campground.findByIdAndUpdate(id,{...req.body.campground})
     req.flash('success','Successfully Updated campground')
@@ -66,7 +67,7 @@ router.put('/:id', validateCampground,catchAsync( async(req,res)=>{
 }));
 
 //delete campground
-router.delete('/:id',catchAsync(async(req,res) =>{
+router.delete('/:id',isloggedIn,catchAsync(async(req,res) =>{
     const { id } =req.params
     const campground = await Campground.findByIdAndDelete(id)
     req.flash('success','Successfully deleted campground')

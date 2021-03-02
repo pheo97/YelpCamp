@@ -69,6 +69,11 @@ app.use(express.static(path.join(__dirname,'public')))
 
 //middleware for flash message
 app.use((req,res,next)=>{
+    console.log(req.session)
+    /*if(!['/login','/'].includes(req.originalUrl)){
+        req.session.returnTo = req.originalUrl;
+    }*/
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
