@@ -1,3 +1,9 @@
+const { campgroundSchema } = require('./schemas.js');
+const ExpressError = require('./Utilities/ExpressError');
+const {reviewSchema} = require('./schemas.js');
+const Campground = require('./models/campground')
+const Review = require('./models/review')
+ 
  module.exports.isloggedIn = (req,res,next)=>{
     if(!req.isAuthenticated()){
         req.session.returnTo = req.originalUrl
@@ -5,4 +11,47 @@
          return res.redirect('/login')
     }
     next();
+}
+
+module.exports.validateCampground = (req, res, next) => {
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+}
+
+module.exports.isauthorised = async (req,res,next) =>{
+    const {id} =req.params;
+    const campground = await Campground.findById(id);
+    if(!campground.author === req.user._id)
+    {
+        req.flash('error','You not permitted to change')
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
+}
+
+module.exports.isReviewAuthorised = async (req,res,next) =>{
+    const {id, reviewId} =req.params;
+    const review = await Review.findById(reviewId);
+    if(!review.author === req.user._id)
+    {
+        req.flash('error','You not permitted to change')
+        return res.redirect(`/campgrounds/${id}`);
+    }
+    next();
+}
+
+
+module.exports.validateReview = (req, res, next) => {
+    const { error } = reviewSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
 }

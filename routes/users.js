@@ -16,7 +16,6 @@ router.post('/register',catchAsync(async(req,res)=>{
 
     req.login(registeredUser,err =>{
         if(err) return next(err);
-        console.log(registeredUser);
         req.flash('Welcome to Yelp camp');
         res.redirect('/campgrounds')
     });
