@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV !== "production"){
+     require('dotenv').config();
+}
+
 //load up all plug ins to be used 
 const express = require('express');
 const app = express();
