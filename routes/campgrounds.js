@@ -41,7 +41,7 @@ router.get('/:id',catchAsync(campground.viewCampground));
 router.get('/:id/edit' ,isloggedIn,isauthorised,catchAsync(campground.viewEditForm));
 
 //update campground 
-router.put('/:id', isloggedIn, isauthorised,validateCampground,catchAsync(campground.updateCampground));
+router.put('/:id', isloggedIn, isauthorised,upload.array('image'),validateCampground,catchAsync(campground.updateCampground));
 
 //delete campground
 router.delete('/:id',isloggedIn,catchAsync(campground.deleteCampground));
