@@ -9,8 +9,10 @@ const ImageSchema = new Schema({
 })
 
 ImageSchema.virtual('thumbnail').get(function(){
-    this.url.replace('/upload','/upload/W_200')
-} )
+    return this.url.replace('/upload','/upload/W_200')
+})
+
+const opts = {toJSON:{virtuals:true}};
 
 //new schema has been created 
 const CampgroundSchema = new Schema({
@@ -41,7 +43,12 @@ const CampgroundSchema = new Schema({
            ref:'Review'
         }
     ]
-})
+},opts);
+
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function(){
+      return `<a href="/campgrounds/${this._id}">${this.title}</a>`
+});
 
 CampgroundSchema.post('findOneAndDelete', async function (doc) {
     if (doc) {
@@ -51,7 +58,7 @@ CampgroundSchema.post('findOneAndDelete', async function (doc) {
             }
         })
     }
-})
+});
 
 //export the database 
 module.exports = mongoose.model('Campground',CampgroundSchema)

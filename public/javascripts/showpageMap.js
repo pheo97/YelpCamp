@@ -7,11 +7,13 @@
     zoom: 9 // starting zoom
      });
 
-     new mapboxgl.Maker()
+     map.addControl(new mapboxgl.NavigationControl());
+
+     new mapboxgl.Marker()
          .setLngLat(campground.geometry.coordinates)
          .setPopup(
              new mapboxgl.Popup({offset:25})
-             .setHMTL(
+             .setHTML(
                  `<h3> ${campground.title}</h3>`
              )
          )
